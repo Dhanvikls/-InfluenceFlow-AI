@@ -1,0 +1,296 @@
+{
+  "name": "InfluenceFlow_AI_Analyzer",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "122399b0-5efe-4952-b054-f28e8817c251",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ff739512-5468-4874-9dc3-82ab972203ae",
+              "name": "name",
+              "value": "Aisha Sharma",
+              "type": "string"
+            },
+            {
+              "id": "42900b57-3444-4f9c-866c-1d46a6eb5cac",
+              "name": "username",
+              "value": "aishafashion",
+              "type": "string"
+            },
+            {
+              "id": "0f1f3bd7-c133-49ae-b95d-93acadd34b18",
+              "name": "niche",
+              "value": "Fashion",
+              "type": "string"
+            },
+            {
+              "id": "d567f9a7-cf5b-434a-ac2b-fd1071522870",
+              "name": "followers",
+              "value": "85000",
+              "type": "string"
+            },
+            {
+              "id": "85922d74-5e38-43c5-82ce-5864880c8cf9",
+              "name": "email",
+              "value": "aisha@example.com",
+              "type": "string"
+            },
+            {
+              "id": "cf5d4b37-3fbf-473e-a178-7c83a87aa87c",
+              "name": "location",
+              "value": "\tMumbai",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "53d77d22-4a9b-49b6-9cd0-f68bb3bda6a8",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "models/gemini-3-flash-preview",
+          "cachedResultName": "Gemini 3 Flash Preview",
+          "cachedResultUrl": ""
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an expert influencer marketing analyst.\n\nAnalyze the following Instagram influencer for a fashion brand collaboration.\n\nINFLUENCER DETAILS:\n\nName: {{ $json.name }}\nUsername: {{ $json.username }}\nNiche: {{ $json.niche }}\nFollowers: {{ $json.followers }}\nLocation: {{ $json.location }}\n\nTASK:\n\n1. Write a short profile summary.\n2. Evaluate relevance to a fashion brand.\n3. Evaluate follower count suitability.\n4. Give a suitability score out of 100.\n5. Recommend whether the brand should collaborate.\n6. Explain your decision.\n\nReturn the result in a clear, structured format.\n\nDo not invent information that is not provided.\nIMPORTANT:\nNever assume engagement rates, audience demographics,\ncontent quality or audience loyalty.\n\nOnly use the information provided.\nClearly mention which information is unavailable.\nTreat the suitability score as preliminary."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "4739a648-8842-453e-b7d1-e89afa30cb27",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "awOZRJlfFbB68umr",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1fGwMGanY7qaeSDHh1zEBAoEobXW1mtchrAdLIZc2zjQ",
+          "mode": "list",
+          "cachedResultName": "InfluenceFlow AI - Influencer CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fGwMGanY7qaeSDHh1zEBAoEobXW1mtchrAdLIZc2zjQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fGwMGanY7qaeSDHh1zEBAoEobXW1mtchrAdLIZc2zjQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('Edit Fields').item.json.name }}",
+            "Username": "={{ $('Edit Fields').item.json.username }}",
+            "Niche": "={{ $('Edit Fields').item.json.niche }}",
+            "Followers": "={{ $('Edit Fields').item.json.followers }}",
+            "Email": "={{ $('Edit Fields').item.json.email }}",
+            "Location": "={{ $('Edit Fields').item.json.location }}",
+            "AI Score": "={{ $json.content.parts[0].text.match(/(\\d{1,3})\\/100/)?.[1] || '' }}",
+            "AI Summary": "={{ $json.content.parts[0].text }}",
+            "Recommendation": "={{ $json.content.parts[0].text.match(/Recommended for Collaboration|Not Recommended for Collaboration|Not suitable/i)?.[0] || 'Review required' }}",
+            "Status": "New Lead"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Username",
+              "displayName": "Username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Niche",
+              "displayName": "Niche",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Followers",
+              "displayName": "Followers",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Location",
+              "displayName": "Location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AI Score",
+              "displayName": "AI Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AI Summary",
+              "displayName": "AI Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Recommendation",
+              "displayName": "Recommendation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        816,
+        0
+      ],
+      "id": "473d32f4-22d8-4dc2-8624-0fdc6b72f939",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "xpxC7xAtt3CIiu2P",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "8c1a0ee9-5634-4444-97d1-f99f097b1ae1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "57a45af1cf639561f6ae7c2955cdb6beec525b60fe936c077a813d0b99305b07"
+  },
+  "nodeGroups": [],
+  "id": "K6tQbwOpNtyKWjwX",
+  "tags": []
+}

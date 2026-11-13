@@ -1,0 +1,324 @@
+{
+  "name": "InfluenceFlow_Email_Automation",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ca080b43-6e91-4cee-8b9e-75ed8526a736",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1fGwMGanY7qaeSDHh1zEBAoEobXW1mtchrAdLIZc2zjQ",
+          "mode": "list",
+          "cachedResultName": "InfluenceFlow AI - Influencer CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fGwMGanY7qaeSDHh1zEBAoEobXW1mtchrAdLIZc2zjQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fGwMGanY7qaeSDHh1zEBAoEobXW1mtchrAdLIZc2zjQ/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        0
+      ],
+      "id": "c84726d2-f46a-412e-bd33-fe9d695bdcc9",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "xpxC7xAtt3CIiu2P",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "models/gemini-3-flash-preview"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an expert influencer marketing email writer.\n\nWrite a personalized collaboration email using these details:\n\nInfluencer Name: {{ $json.Name }}\nInstagram Username: {{ $json.Username }}\nNiche: {{ $json.Niche }}\nFollowers: {{ $json.Followers }}\nBrand: InfluenceFlow Fashion\n\nRequirements:\n1. Write a professional subject line.\n2. Greet the influencer by name.\n3. Introduce the brand.\n4. Explain the collaboration opportunity.\n5. Mention why they were selected.\n6. Include a clear call to action.\n7. Include an opt-out option.\n8. Keep the email friendly and concise.\n\nDo not invent personal details.\nReturn the subject and email body separately."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "79f64105-716a-48fd-a1ee-b833ccf9df34",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "awOZRJlfFbB68umr",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $json.content.parts[0].text.match(/\\*\\*Subject:\\*\\*\\s*(.*)/)?.[1] || 'Collaboration Opportunity' }}",
+        "message": "={{ $json.content.parts[0].text.split('**Email Body:**')[1]?.trim() || $json.content.parts[0].text }}",
+        "options": {
+          "sendTo": "Dhanvik3009@gmail.com"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        816,
+        0
+      ],
+      "id": "5389550b-4d38-470c-b977-79717683c380",
+      "name": "Create a draft",
+      "webhookId": "61d95548-e1d1-49a2-9c54-fc8ae771fa56",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "HDBueqZiagSvcTgs",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1fGwMGanY7qaeSDHh1zEBAoEobXW1mtchrAdLIZc2zjQ",
+          "mode": "list",
+          "cachedResultName": "InfluenceFlow AI - Influencer CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fGwMGanY7qaeSDHh1zEBAoEobXW1mtchrAdLIZc2zjQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fGwMGanY7qaeSDHh1zEBAoEobXW1mtchrAdLIZc2zjQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Username": "={{ $('Get row(s) in sheet').item.json.Username }}",
+            "Status": "Draft Created"
+          },
+          "matchingColumns": [
+            "Username"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Username",
+              "displayName": "Username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Niche",
+              "displayName": "Niche",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Followers",
+              "displayName": "Followers",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Location",
+              "displayName": "Location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "AI Score",
+              "displayName": "AI Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "AI Summary",
+              "displayName": "AI Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Recommendation",
+              "displayName": "Recommendation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "815bd329-131d-407a-9081-9b0191fa8367",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "xpxC7xAtt3CIiu2P",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Create a draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a draft": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "279b8196-50ce-4932-9034-3ffdba054250",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "57a45af1cf639561f6ae7c2955cdb6beec525b60fe936c077a813d0b99305b07"
+  },
+  "nodeGroups": [],
+  "id": "Rp2b6MuytPgwnbH0",
+  "tags": []
+}

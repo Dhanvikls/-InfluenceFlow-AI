@@ -1,0 +1,410 @@
+{
+  "name": "InfluenceFlow_Reply_Management",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a50f8bbf-7696-4061-8e59-f90d945fe3c2",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 1,
+        "filters": {
+          "q": "in:inbox newer_than:7d"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        272,
+        -32
+      ],
+      "id": "f253be5a-dcce-41a1-be9f-235e07aba18b",
+      "name": "Get many messages",
+      "webhookId": "4119df64-1eb0-4e24-a14f-3e97beb9da52",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "HDBueqZiagSvcTgs",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "models/gemini-3-flash-preview"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an email reply classifier for InfluenceFlow.\n\nAnalyze this incoming email:\n\nFrom: {{ $json.From }}\nSubject: {{ $json.Subject }}\nMessage: {{ $json.snippet }}\n\nClassify it into one category:\n- Interested\n- Not Interested\n- Pricing\n- Collaboration\n- Unrelated\n\nGive:\n1. Category\n2. Short summary\n3. Suggested next action\n4. A polite reply draft\n\nIf the email is unrelated, clearly mark it Unrelated.\nDo not invent information."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        400,
+        192
+      ],
+      "id": "5f27ae5a-0d38-4619-bdd4-9bace1f4daf8",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "awOZRJlfFbB68umr",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "models/gemini-3-flash-preview"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an email reply classifier for InfluenceFlow.\n\nAnalyze this incoming email:\n\nFrom: {{ $('Get many messages').item.json.From }}\nSubject: {{ $('Get many messages').item.json.Subject }}\nMessage: {{ $('Get many messages').item.json.snippet }}\n\nClassify it as:\nInterested\nNot Interested\nPricing\nCollaboration\nUnrelated\n\nProvide:\n1. Category\n2. Short summary\n3. Suggested next action\n4. Polite reply draft\n\nDo not invent information."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        672,
+        0
+      ],
+      "id": "e5e574b1-b97c-469b-b5bc-0b6d4c066ba5",
+      "name": "Message a model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "awOZRJlfFbB68umr",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1fGwMGanY7qaeSDHh1zEBAoEobXW1mtchrAdLIZc2zjQ",
+          "mode": "list",
+          "cachedResultName": "InfluenceFlow AI - Influencer CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fGwMGanY7qaeSDHh1zEBAoEobXW1mtchrAdLIZc2zjQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fGwMGanY7qaeSDHh1zEBAoEobXW1mtchrAdLIZc2zjQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "={{ \n$json.content.parts[0].text.includes('Not Interested') ? 'Not Interested' :\n$json.content.parts[0].text.includes('Pricing') ? 'Pricing' :\n$json.content.parts[0].text.includes('Interested') ? 'Interested' :\n$json.content.parts[0].text.includes('Collaboration') ? 'Collaboration' :\n'Review Required'\n}}",
+            "Email": "={{ $('Get many messages').item.json.From.match(/<([^>]+)>/)?.[1] || $('Get many messages').item.json.From }}"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Username",
+              "displayName": "Username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Niche",
+              "displayName": "Niche",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Followers",
+              "displayName": "Followers",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Location",
+              "displayName": "Location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "AI Score",
+              "displayName": "AI Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "AI Summary",
+              "displayName": "AI Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Recommendation",
+              "displayName": "Recommendation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1248,
+        0
+      ],
+      "id": "73d83527-136e-4ff3-ae22-a7a7327692ef",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "xpxC7xAtt3CIiu2P",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "91b10b1a-8cd2-4bd5-98a5-cc12bb4529d3",
+              "leftValue": "={{ $json.content.parts[0].text }}",
+              "rightValue": "Unrelated",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.4,
+      "position": [
+        1024,
+        16
+      ],
+      "id": "50cfbbdd-4070-41a1-a75d-35b5d0d07a58",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "=Re: {{ $('Get many messages').item.json.Subject }}",
+        "message": "We'll map the Gemini reply draft.",
+        "options": {
+          "threadId": "={{ $('Get many messages').item.json.threadId }}",
+          "sendTo": "={{ $('Get many messages').item.json.From.match(/<([^>]+)>/)?.[1] || $('Get many messages').item.json.From }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1472,
+        0
+      ],
+      "id": "4212d42b-0163-463e-8c62-b72c17da94a9",
+      "name": "Create a draft",
+      "webhookId": "fe4363f9-5b91-4561-895d-22fc3a99799f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "HDBueqZiagSvcTgs",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get many messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many messages": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Message a model1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model1": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Create a draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1475cc91-d600-4a6d-a396-d4c650f40de9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "57a45af1cf639561f6ae7c2955cdb6beec525b60fe936c077a813d0b99305b07"
+  },
+  "nodeGroups": [],
+  "id": "TLCNv93HAeqNUfCF",
+  "tags": []
+}
